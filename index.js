@@ -9,20 +9,18 @@ require('./app_builder/src/reactions');
 
 // implementation
 function onNodeExit() {
-  const logger = getDefaultLogger();
-  logger.log({level: 'info', message: 'Exiting...'});
+    const logger = getDefaultLogger();
+    logger.log({level: 'info', message: 'Exiting...'});
 
-  clearAllTasksWatchDescriptors()
+    clearAllTasksWatchDescriptors()
 }
 
 process.on('exit', onNodeExit);
 process.on('SIGINT', () => {
-  process.exit('SIGINT');
+    process.exit('SIGINT');
 });
 
 const logger = getDefaultLogger();
 logger.log({level: 'info', message: 'Logger initiated...'});
 
 reloadJSONTasksAction();
-
-

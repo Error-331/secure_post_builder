@@ -5,96 +5,96 @@ const {unless, isNil, equals, defaultTo, keysIn, pathEq, pickBy, intersection, c
 
 // local imports
 const {
-  PATH_TO_TASKS_JSON,
-  RESTRICTED_TASKS_NAMES,
-  TASK_TEMPLATE,
+    PATH_TO_TASKS_JSON,
+    RESTRICTED_TASKS_NAMES,
+    TASK_TEMPLATE,
 
-  TASK_BUSY_STATE,
+    TASK_BUSY_STATE,
 
-  MAIN_CONFIG_JSON_WATCHER_TASK_NAME,
-  MAIN_CONFIG_JSON_WATCHER_STRATEGY,
-  MAIN_CONFIG_JSON_WATCHER_TASK_CONFIG_TEMPLATE
+    MAIN_CONFIG_JSON_WATCHER_TASK_NAME,
+    MAIN_CONFIG_JSON_WATCHER_STRATEGY,
+    MAIN_CONFIG_JSON_WATCHER_TASK_CONFIG_TEMPLATE
 } = require('./../constants/tasks');
 
 // implementation
 
 // throws error
 function reloadJSONTasks() {
-  unless(isNil, () => delete require.cache[PATH_TO_TASKS_JSON])(require.cache[PATH_TO_TASKS_JSON]);
-  return require(PATH_TO_TASKS_JSON);
+    unless(isNil, () => delete require.cache[PATH_TO_TASKS_JSON])(require.cache[PATH_TO_TASKS_JSON]);
+    return require(PATH_TO_TASKS_JSON);
 }
 
 function extractTasksNames(tasks) {
-  return keysIn(tasks);
+    return keysIn(tasks);
 }
 
 function extractSkippedTasksNames(tasks) {
-  const skippedTasksByName = intersection(RESTRICTED_TASKS_NAMES, extractTasksNames(tasks));
-  const skippedTasksByStrategy = extractTasksNames(pickBy(pathEq(['strategy'], MAIN_CONFIG_JSON_WATCHER_STRATEGY), tasks));
+    const skippedTasksByName = intersection(RESTRICTED_TASKS_NAMES, extractTasksNames(tasks));
+    const skippedTasksByStrategy = extractTasksNames(pickBy(pathEq(['strategy'], MAIN_CONFIG_JSON_WATCHER_STRATEGY), tasks));
 
-  return concat(skippedTasksByName, skippedTasksByStrategy);
+    return concat(skippedTasksByName, skippedTasksByStrategy);
 }
 
 function removeTasks(tasks, tasksToRemove = []) {
-  return omit(tasksToRemove, tasks);
+    return omit(tasksToRemove, tasks);
 }
 
 function addTask(tasks, taskName, taskConfig) {
-  return unless(tasks => !isNil(tasks[taskName]), () => {
-    const newTasks = clone(tasks);
+    return unless(tasks => !isNil(tasks[taskName]), () => {
+        const newTasks = clone(tasks);
 
-    newTasks[taskName] = getTask();
-    newTasks[taskName].newConfig = clone(taskConfig);
+        newTasks[taskName] = getTask();
+        newTasks[taskName].newConfig = clone(taskConfig);
 
-    return newTasks
-  })(tasks);
+        return newTasks
+    })(tasks);
 }
 
 function addMainConfigJsonWatcherTask(tasks) {
-  return addTask(tasks, MAIN_CONFIG_JSON_WATCHER_TASK_NAME, MAIN_CONFIG_JSON_WATCHER_TASK_CONFIG_TEMPLATE);
+    return addTask(tasks, MAIN_CONFIG_JSON_WATCHER_TASK_NAME, MAIN_CONFIG_JSON_WATCHER_TASK_CONFIG_TEMPLATE);
 }
 
 function isTaskState(state, task) {
-  return  getTaskState(task) === state;
+    return  getTaskState(task) === state;
 }
 
 function getTaskTemplate() {
-  return clone(TASK_TEMPLATE);
+    return clone(TASK_TEMPLATE);
 }
 
 function getTask(task) {
-  return defaultTo(getTaskTemplate())(task);
+    return defaultTo(getTaskTemplate())(task);
 }
 
 function getTaskState(task) {
-  return getTask(task).state;
+    return getTask(task).state;
 }
 
 function setTaskJSONConfig(task, jsonConfig) {
-  task = getTask(task);
+    task = getTask(task);
 
-  if (isNil(jsonConfig)) {
+    if (isNil(jsonConfig)) {
+        return task;
+    }
+
+    task = unless(equals(task.currentConfig), (taskConfig) => {
+        const newTask = clone(task);
+        newTask.newConfig = clone(taskConfig);
+
+        return newTask;
+    })(jsonConfig);
+
     return task;
-  }
-
-  task = unless(equals(task.currentConfig), (taskConfig) => {
-    const newTask = clone(task);
-    newTask.newConfig = clone(taskConfig);
-
-    return newTask;
-  })(jsonConfig);
-
-  return task;
 }
 
 function mergeTasksCreateIfNotExist(tasks, jsonTasks) {
-  const taskNames = extractTasksNames(jsonTasks);
-  const newTasks = reduce((newTasks, taskName) => {
-    newTasks[taskName] = setTaskJSONConfig(tasks[taskName], jsonTasks[taskName]);
-    return newTasks;
-  }, {}, taskNames);
+    const taskNames = extractTasksNames(jsonTasks);
+    const newTasks = reduce((newTasks, taskName) => {
+        newTasks[taskName] = setTaskJSONConfig(tasks[taskName], jsonTasks[taskName]);
+        return newTasks;
+    }, {}, taskNames);
 
-  return mergeDeepRight(tasks, newTasks);
+    return mergeDeepRight(tasks, newTasks);
 }
 
 // exports

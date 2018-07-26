@@ -8,7 +8,7 @@ const tasksState = require('./tasks');
 
 // implementation
 const store = observable({
-  tasks: {}
+    tasks: {}
 });
 
 // exports

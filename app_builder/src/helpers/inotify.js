@@ -11,83 +11,83 @@ const {TAR_ARCHIVE_MODIFIED_MASK_CHAINS} = require('./../constants/inotify');
 let inotifyInstance = null;
 
 function createDefaultInotifyInstance() {
-  inotifyInstance = new Inotify();
-  return inotifyInstance;
+    inotifyInstance = new Inotify();
+    return inotifyInstance;
 }
 
 function getDefaultInotifyInstance() {
-  inotifyInstance = unless(complement(isNil), createDefaultInotifyInstance)(inotifyInstance);
-  return inotifyInstance
+    inotifyInstance = unless(complement(isNil), createDefaultInotifyInstance)(inotifyInstance);
+    return inotifyInstance
 }
 
 function getMaskChainVariantsMaxMasks(maskChains) {
-  return reduce((maxMasks, maskChain) => max(length(maskChain), maxMasks), 0, maskChains);
+    return reduce((maxMasks, maskChain) => max(length(maskChain), maxMasks), 0, maskChains);
 }
 
 // throws error
 function removeWatcher(watchDescriptor) {
-  const currentInotifyInstance = getDefaultInotifyInstance();
-  currentInotifyInstance.removeWatch(watchDescriptor);
+    const currentInotifyInstance = getDefaultInotifyInstance();
+    currentInotifyInstance.removeWatch(watchDescriptor);
 }
 
 // throws error
 function removeWatchers(watchDescriptors) {
-  forEach(removeWatcher, watchDescriptors);
+    forEach(removeWatcher, watchDescriptors);
 }
 
 function addWatch(path, watchFor, callback = () => {}) {
-  const currentInotifyInstance = getDefaultInotifyInstance();
+    const currentInotifyInstance = getDefaultInotifyInstance();
 
-  return currentInotifyInstance.addWatch({
-    path,
-    watch_for: watchFor,
-    callback
-  });
+    return currentInotifyInstance.addWatch({
+        path,
+        watch_for: watchFor,
+        callback
+    });
 }
 
 function checkInotifyEventByMasks(mandatoryMasks, additionalMasks, negativeMasks, filename, event) {
-  const {mask, name} = event;
+    const {mask, name} = event;
 
-  if (filename !== name) {
-    return false;
-  }
+    if (filename !== name) {
+        return false;
+    }
 
-  mandatoryMasks = defaultTo([1])(mandatoryMasks);
-  additionalMasks = defaultTo([1])(additionalMasks);
-  negativeMasks = defaultTo([0])(negativeMasks);
+    mandatoryMasks = defaultTo([1])(mandatoryMasks);
+    additionalMasks = defaultTo([1])(additionalMasks);
+    negativeMasks = defaultTo([0])(negativeMasks);
 
-  const maskCheckPositiveFunc = userMask => gt(userMask & mask, 0);
-  const maskCheckNegativeFunc = userMask => equals(userMask & mask, 0);
+    const maskCheckPositiveFunc = userMask => gt(userMask & mask, 0);
+    const maskCheckNegativeFunc = userMask => equals(userMask & mask, 0);
 
-  const mandatoryMasksResult = ifElse(
-    is(Object),
-    userMasks => all(maskCheckPositiveFunc, userMasks),
-    maskCheckPositiveFunc
-  )(mandatoryMasks);
+    const mandatoryMasksResult = ifElse(
+        is(Object),
+        userMasks => all(maskCheckPositiveFunc, userMasks),
+        maskCheckPositiveFunc
+    )(mandatoryMasks);
 
-  const additionalMasksResult = ifElse(
-    is(Object),
-    userMasks => any(maskCheckPositiveFunc, userMasks),
-    maskCheckPositiveFunc
-  )(additionalMasks);
+    const additionalMasksResult = ifElse(
+        is(Object),
+        userMasks => any(maskCheckPositiveFunc, userMasks),
+        maskCheckPositiveFunc
+    )(additionalMasks);
 
-  const negativeMasksResult = ifElse(
-    is(Object),
-    userMasks => all(maskCheckNegativeFunc, userMasks),
-    maskCheckNegativeFunc
-  )(negativeMasks);
+    const negativeMasksResult = ifElse(
+        is(Object),
+        userMasks => all(maskCheckNegativeFunc, userMasks),
+        maskCheckNegativeFunc
+    )(negativeMasks);
 
-  return mandatoryMasksResult && additionalMasksResult && negativeMasksResult;
+    return mandatoryMasksResult && additionalMasksResult && negativeMasksResult;
 }
 
 function isUserMaskChainMatch(inotifyMaskChains, userMaskChain) {
-  return any((inotifyMaskChain) => {
-    const inotifyMaskChainLength = length(inotifyMaskChain);
-    const userMaskChainLength = length(userMaskChain);
+    return any((inotifyMaskChain) => {
+        const inotifyMaskChainLength = length(inotifyMaskChain);
+        const userMaskChainLength = length(userMaskChain);
 
-    const truncatedUserMaskChain = slice(userMaskChainLength - inotifyMaskChainLength, Infinity, userMaskChain);
-    return equals(truncatedUserMaskChain, inotifyMaskChain)
-  })(inotifyMaskChains);
+        const truncatedUserMaskChain = slice(userMaskChainLength - inotifyMaskChainLength, Infinity, userMaskChain);
+        return equals(truncatedUserMaskChain, inotifyMaskChain)
+    })(inotifyMaskChains);
 }
 
 // exports

@@ -20,16 +20,16 @@ const TASK_WATCHING_STATE = 2;
 const TASK_ERROR_STATE = 4;
 
 const MAIN_CONFIG_JSON_WATCHER_TASK_CONFIG_TEMPLATE = Object.freeze({
-  strategy: MAIN_CONFIG_JSON_WATCHER_STRATEGY,
-  pathToDirectory: process.cwd(),
-  pathToFile: PATH_TO_TASKS_JSON
+    strategy: MAIN_CONFIG_JSON_WATCHER_STRATEGY,
+    pathToDirectory: process.cwd(),
+    pathToFile: PATH_TO_TASKS_JSON
 });
 
 const TASK_TEMPLATE = Object.freeze({
-  state: TASK_INACTIVE_STATE,
-  watchDescriptors: {},
-  currentConfig: {},
-  newConfig: {}
+    state: TASK_INACTIVE_STATE,
+    watchDescriptors: {},
+    currentConfig: {},
+    newConfig: {}
 });
 
 // exports
