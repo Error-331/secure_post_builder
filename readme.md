@@ -39,14 +39,16 @@ In general, the file should look like this:
 ```
 
 Each task should have at least two fields defined, which are `strategy` and `label`. The `strategy` field defines which strategy should be used for post build deployment (you can find the 
-list of available strategies in ['Strategies list'](#strategies-list)). The `label` defines a literal representation of the task and mainly used in logs. Pay attention that
+list of available strategies in [Strategies list](#strategies-list)). The `label` defines a literal representation of the task and mainly used in logs. Pay attention that
 there should be no two (or more) tasks with the same `label`.
 
 ## Strategies
 
 ### Strategies list
 
-`pm2_nodejs_simple` - strategy suitable for building regular NodeJS projects by means of PM2 `ecosystem.config.js` file.
+`pm2_nodejs_simple` - strategy suitable for building regular [NodeJS](https://nodejs.org/) projects by means of [PM2](http://pm2.keymetrics.io/) `ecosystem.config.js` file.
+
+`laravel_php_simple` - strategy suitable for building regular [PHP](http://php.net/) projects which utizize [Laravel](https://laravel.com/) framework.
 
 #### pm2_nodejs_simple
 
@@ -85,6 +87,46 @@ Task watches the directory specified in `pathToSourceFolder` for creation/modifi
       "pathToDistFolder": "/home/someuser/testto",
       "archiveFileNameToWatch": "testfrom.tar.gz",
       "pm2TaskName": "js_ui_components"
+    }
+  }
+}
+
+```
+
+#### laravel_php_simple
+
+Similar too [pm2_nodejs_simple](pm2_nodejs_simple) except there will be not service reloading using `PM2`, but the `.env` (configuration file for `Laravel` framework) 
+file will be copied from `pathToDistFolder` directory to `current` build directory.
+
+##### Options
+
+`strategy` - strategy name (should be `laravel_php_simple`);
+
+`label` - literal representation of the task (any string);
+
+`pathToSourceFolder` - path to source directory where archive with source code resides;
+
+`pathToDistFolder` - path to destination directory where unpacking of source code archive will take place;
+
+`archiveFileNameToWatch` - name of the archive file (in `pathToSourceFolder` directory) which will be monitored for changes;
+  
+`fileWatchDogTimeout` - timeout in milliseconds after which internal state of the task will be reseted (to prevent erroneous behaviour, default is 6000);
+
+`archiveWatchDebounceWait` - timeout in milliseconds after which task will initiate its strategy after necessary Inotify events were captured (default is 4000);
+
+##### Example
+
+```json
+
+{
+  "tasks": {
+    "testPHPTask": {
+      "strategy": "laravel_php_simple",
+      "label": "Backend service (development)",
+
+      "pathToSourceFolder": "/home/sergei-331/testfromphp",
+      "pathToDistFolder": "/home/sergei-331/testtophp",
+      "archiveFileNameToWatch": "testfrom.tar.gz"
     }
   }
 }
