@@ -7,13 +7,17 @@ require('winston-daily-rotate-file');
 const {isNil, complement, equals, unless, curry} = require('ramda');
 
 // local imports
-const {DAILY_ROTATE_FILE_LOG_CONFIGURATION} = require('./../constants/logs');
+const {
+    DAILY_ROTATE_FILE_LOG_CONFIGURATION,
+    DAILY_ROTATE_INOTIFY_FILE_LOG_CONFIGURATION,
+} = require('./../constants/logs');
 
 // implementation
 let logger = null;
+let inotifyLogger = null;
 
-function createDefaultLogger() {
-    const dailyRotateFileTransport = new (winston.transports.DailyRotateFile)(DAILY_ROTATE_FILE_LOG_CONFIGURATION);
+function createLogger(configuration) {
+    const dailyRotateFileTransport = new (winston.transports.DailyRotateFile)(configuration);
     const logger = winston.createLogger({
         format: winston.format.json(),
         transports: [
@@ -25,9 +29,22 @@ function createDefaultLogger() {
     return logger;
 }
 
+function createDefaultLogger() {
+    return createLogger(DAILY_ROTATE_FILE_LOG_CONFIGURATION);
+}
+
+function createInotifyLogger() {
+    return createLogger(DAILY_ROTATE_INOTIFY_FILE_LOG_CONFIGURATION);
+}
+
 function getDefaultLogger() {
     logger = unless(complement(isNil), createDefaultLogger)(logger);
     return logger
+}
+
+function getInotifyLogger() {
+    inotifyLogger = unless(complement(isNil), createInotifyLogger)(inotifyLogger);
+    return inotifyLogger
 }
 
 function log(level, message)  {
@@ -40,8 +57,13 @@ const logWarn = curry(log)('warn');
 const logError = curry(log)('error');
 
 function logInotifyEvent(taskName, watchName, event) {
+    const currentLogger = getInotifyLogger();
+
     const {watch, mask, cookie, name} = event;
-    logInfo(`Inotify event(watch: ${watch}, mask: ${mask}, cookie: ${cookie}, name: '${name}') for '${watchName}' watch of task '${taskName}'`);
+    currentLogger.log({
+        level: 'info',
+        message: `Inotify event(watch: ${watch}, mask: ${mask}, cookie: ${cookie}, name: '${name}') for '${watchName}' watch of task '${taskName}'`
+    });
 }
 
 // exports
