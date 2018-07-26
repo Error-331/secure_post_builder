@@ -3,13 +3,19 @@
 // external imports
 const {resolve} = require('path');
 const {flow} = require('mobx');
-const {defaultTo, mergeDeepRight} = require('ramda');
+const {defaultTo} = require('ramda');
 
 const execa = require('execa');
 const moment = require('moment');
 
 // local imports
-const {OLD_BUILD_DIRECTORY_NAME, CURRENT_BUILD_DIRECTORY_NAME} = require('./../constants/common_builds');
+const {
+    OLD_BUILD_DIRECTORY_NAME,
+    CURRENT_BUILD_DIRECTORY_NAME,
+
+    ENV_FILE_NAME
+} = require('./../constants/common_builds');
+
 const {
     getPathToSourceArchiveFile,
     getPathToDestinationArchiveFile,
@@ -81,6 +87,17 @@ function * reloadPM2TaskByEcosystemFileInCurrentBuild(task) {
     yield * reloadPM2TaskByEcosystemFile(task, cwd)
 }
 
+// throws error
+function * copyENVFile(task) {
+    const {pathToDistFolder} = task.currentConfig;
+
+    const envFileLocation = resolve(pathToDistFolder, ENV_FILE_NAME);
+    const currentBuildDirectoryLocation = resolve(pathToDistFolder, CURRENT_BUILD_DIRECTORY_NAME);
+    const newEnvFileLocation = resolve(currentBuildDirectoryLocation, ENV_FILE_NAME);
+
+    yield execa('cp', [envFileLocation, newEnvFileLocation]);
+}
+
 function * makeBuildFromArchive(task) {
     // get path to destination folder and archive file name
     const {pathToDistFolder, archiveFileNameToWatch} = task.currentConfig;
@@ -125,4 +142,5 @@ exports.startPM2TaskByEcosystemFileInCurrentBuild = flow(startPM2TaskByEcosystem
 exports.reloadPM2TaskByEcosystemFile = flow(reloadPM2TaskByEcosystemFile);
 exports.reloadPM2TaskByEcosystemFileInCurrentBuild = flow(reloadPM2TaskByEcosystemFileInCurrentBuild);
 
+exports.copyENVFile = flow(copyENVFile);
 exports.makeBuildFromArchive = flow(makeBuildFromArchive);

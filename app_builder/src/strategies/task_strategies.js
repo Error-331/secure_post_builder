@@ -16,6 +16,8 @@ function taskStrategyPatternFactory(strategyName) {
             return mainConfigJSONWatcherTaskStrategy;
         case 'pm2_nodejs_simple':
             return require('./nodejs/pm2_nodejs_simple');
+        case 'laravel_php_simple':
+            return require('./php/laravel_php_simple');
         default:
             logWarn(`Cannot find strategy for strategy named: ${strategyName}`);
             return null;

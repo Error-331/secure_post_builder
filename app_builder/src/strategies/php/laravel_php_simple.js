@@ -22,7 +22,7 @@ const {
 } = require('./../../helpers/inotify');
 
 const {addWatchDescriptorToTask, setTaskBusyState, setTaskInactiveState, setTaskErroneousState} = require('./../../actions/tasks');
-const {stopPM2TaskByNameSilent, reloadPM2TaskByEcosystemFileInCurrentBuild, makeBuildFromArchive} = require('./../../flows/common_builds');
+const {copyENVFile, makeBuildFromArchive} = require('./../../flows/common_builds');
 
 // implementation
 const WATCH_DIRECTORY_FROM_FOR_TAR_ARCHIVE_MOD_WATCHER_NAME = 'WATCH_DIRECTORY_FROM_FOR_TAR_ARCHIVE_MOD_WATCHER_NAME';
@@ -58,25 +58,22 @@ const onDirectoryFromTarArchiveChangeEvent = async (task, taskName, watchName, e
     resetTaskState(task, taskName);
 
     // log start of the flow
-    logInfo(`Starting 'PM2 NodeJS Simple' flows for task '${taskName}'`);
+    logInfo(`Starting 'Laravel PHP Simple' flows for task '${taskName}'`);
 
     // initiate 'Build from archive' flow
     try {
-        logInfo(`Starting 'stop PM2 task by name silent' flow for task '${taskName}'`);
-        await stopPM2TaskByNameSilent(task);
-
         logInfo(`Starting 'make build from archive' flow for task '${taskName}'`);
         await makeBuildFromArchive(task);
 
-        logInfo(`Starting 'reload PM2 task by ecosystem file in current build' flows for task '${taskName}'`);
-        await reloadPM2TaskByEcosystemFileInCurrentBuild(task);
+        logInfo(`Starting 'copy .env file' flow for task '${taskName}'`);
+        await copyENVFile(task);
     } catch (error) {
         console.error(error);
-        logError(`Error while performing 'PM2 NodeJS Simple' flows for task '${taskName}': ${error.message}`);
+        logError(`Error while performing 'Laravel PHP Simple' flows for task '${taskName}': ${error.message}`);
     }
 
     // log end of the flow
-    logInfo(`Ending 'PM2 NodeJS Simple' flows for task '${taskName}'`);
+    logInfo(`Ending ''Laravel PHP Simple' flows for task '${taskName}'`);
 
     // set task state as inactive
     setTaskInactiveState(taskName);
@@ -114,7 +111,7 @@ async function onDirectoryFromTarArchiveChange(task, taskName, watchName, event)
     }
 }
 
-const pm2NodejsSimple = (task, taskName) => {
+const laravelPHPSimple = (task, taskName) => {
     // prepare additional state for task
     task.watchDogTimeoutId = null;
     task.storedMasks = List();
@@ -159,4 +156,4 @@ const pm2NodejsSimple = (task, taskName) => {
 };
 
 // exports
-module.exports = pm2NodejsSimple;
+module.exports = laravelPHPSimple;
