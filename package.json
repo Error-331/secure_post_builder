@@ -1,0 +1,25 @@
+{
+  "name": "test",
+  "version": "1.0.0",
+  "scripts": {
+    "start_development": "NODE_ENV=develompment node ./index.js",
+    "start_production": "NODE_ENV=production node ./index.js"
+  },
+  "licenses": [
+    {
+      "type": "Proprietary"
+    }
+  ],
+  "dependencies": {
+    "moment": "^2.22.2",
+    "ramda": "^0.25.0",
+    "lodash.debounce": "^4.0.8",
+    "immutable": "^3.8.2",
+    "mobx": "^5.0.3",
+    "execa": "^0.10.0",
+    "inotify": "^1.4.2",
+    "winston": "^3.0.0",
+    "winston-daily-rotate-file": "^3.2.3"
+  },
+  "devDependencies": {}
+}

@@ -1,0 +1,13 @@
+{
+  "tasks": {
+    "testNodeJSTask": {
+      "strategy": "pm2_nodejs_simple",
+      "label": "Frontend service (development)",
+
+      "pathToSourceFolder": "/home/someuser/testfrom",
+      "pathToDistFolder": "/home/someuser/testto",
+      "archiveFileNameToWatch": "testfrom.tar.gz",
+      "pm2TaskName": "js_ui_components"
+    }
+  }
+}

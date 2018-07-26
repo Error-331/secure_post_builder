@@ -1,0 +1,50 @@
+'use strict';
+
+// external imports
+const {join} = require('path');
+
+// local imports
+
+// implementation
+const MAIN_CONFIG_JSON_WATCHER_TASK_NAME = 'mainConfigJSONWatcherTask';
+const MAIN_CONFIG_JSON_WATCHER_STRATEGY = 'main_config_json_watcher_task';
+
+const META_TASK_NAME = 'meta';
+const RESTRICTED_TASKS_NAMES = [MAIN_CONFIG_JSON_WATCHER_TASK_NAME, META_TASK_NAME];
+
+const PATH_TO_TASKS_JSON =  join(process.cwd(), 'tasks.json');
+
+const TASK_INACTIVE_STATE = 0;
+const TASK_BUSY_STATE = 1;
+const TASK_WATCHING_STATE = 2;
+const TASK_ERROR_STATE = 4;
+
+const MAIN_CONFIG_JSON_WATCHER_TASK_CONFIG_TEMPLATE = Object.freeze({
+  strategy: MAIN_CONFIG_JSON_WATCHER_STRATEGY,
+  pathToDirectory: process.cwd(),
+  pathToFile: PATH_TO_TASKS_JSON
+});
+
+const TASK_TEMPLATE = Object.freeze({
+  state: TASK_INACTIVE_STATE,
+  watchDescriptors: {},
+  currentConfig: {},
+  newConfig: {}
+});
+
+// exports
+exports.MAIN_CONFIG_JSON_WATCHER_TASK_NAME = MAIN_CONFIG_JSON_WATCHER_TASK_NAME;
+exports.MAIN_CONFIG_JSON_WATCHER_STRATEGY = MAIN_CONFIG_JSON_WATCHER_STRATEGY;
+
+exports.META_TASK_NAME = META_TASK_NAME;
+exports.RESTRICTED_TASKS_NAMES = RESTRICTED_TASKS_NAMES;
+
+exports.PATH_TO_TASKS_JSON = PATH_TO_TASKS_JSON;
+
+exports.TASK_INACTIVE_STATE = TASK_INACTIVE_STATE;
+exports.TASK_BUSY_STATE = TASK_BUSY_STATE;
+exports.TASK_WATCHING_STATE = TASK_WATCHING_STATE;
+exports.TASK_ERROR_STATE = TASK_ERROR_STATE;
+
+exports.MAIN_CONFIG_JSON_WATCHER_TASK_CONFIG_TEMPLATE = MAIN_CONFIG_JSON_WATCHER_TASK_CONFIG_TEMPLATE;
+exports.TASK_TEMPLATE = TASK_TEMPLATE;

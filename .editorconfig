@@ -1,0 +1,5 @@
+# JS preference
+[*.js]
+indent_style = space
+indent_size = 4
+tab_width = 2
