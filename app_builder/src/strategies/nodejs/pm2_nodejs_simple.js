@@ -9,7 +9,7 @@ const debounce = require('lodash.debounce');
 const {TASK_INACTIVE_STATE} = require('./../../constants/tasks');
 const {FILE_WATCH_DOG_TIMEOUT, ARCHIVE_WATCH_DEBOUNCE_WAIT} = require('./../../constants/strategies');
 
-const {logInfo, logWarn, logError, logInotifyEvent} = require('./../../helpers/logs');
+const {logInfo, logWarn, logError, logInotifyEvent, logExeca} = require('./../../helpers/logs');
 const {isPathReadableSync} = require('./../../helpers/file_system');
 const {isTaskStateBusy} = require('./../../helpers/tasks');
 const {
@@ -63,13 +63,13 @@ const onDirectoryFromTarArchiveChangeEvent = async (task, taskName, watchName, e
     // initiate 'Build from archive' flow
     try {
         logInfo(`Starting 'stop PM2 task by name silent' flow for task '${taskName}'`);
-        await stopPM2TaskByNameSilent(task);
+        logExeca(taskName, await stopPM2TaskByNameSilent(task));
 
         logInfo(`Starting 'make build from archive' flow for task '${taskName}'`);
-        await makeBuildFromArchive(task);
+        logExeca(taskName, await makeBuildFromArchive(task));
 
         logInfo(`Starting 'reload PM2 task by ecosystem file in current build' flows for task '${taskName}'`);
-        await reloadPM2TaskByEcosystemFileInCurrentBuild(task);
+        logExeca(taskName, await reloadPM2TaskByEcosystemFileInCurrentBuild(task));
     } catch (error) {
         console.error(error);
         logError(`Error while performing 'PM2 NodeJS Simple' flows for task '${taskName}': ${error.message}`);

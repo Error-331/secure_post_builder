@@ -9,7 +9,7 @@ const debounce = require('lodash.debounce');
 const {TASK_INACTIVE_STATE} = require('./../../constants/tasks');
 const {FILE_WATCH_DOG_TIMEOUT, ARCHIVE_WATCH_DEBOUNCE_WAIT} = require('./../../constants/strategies');
 
-const {logInfo, logWarn, logError, logInotifyEvent} = require('./../../helpers/logs');
+const {logInfo, logWarn, logError, logInotifyEvent, logExeca} = require('./../../helpers/logs');
 const {isPathReadableSync} = require('./../../helpers/file_system');
 const {isTaskStateBusy} = require('./../../helpers/tasks');
 const {
@@ -22,7 +22,9 @@ const {
 } = require('./../../helpers/inotify');
 
 const {addWatchDescriptorToTask, setTaskBusyState, setTaskInactiveState, setTaskErroneousState} = require('./../../actions/tasks');
+
 const {copyENVFile, makeBuildFromArchive} = require('./../../flows/common_builds');
+const {runLaravelMigrationsInCurrentBuild} = require('./../../flows/php');
 
 // implementation
 const WATCH_DIRECTORY_FROM_FOR_TAR_ARCHIVE_MOD_WATCHER_NAME = 'WATCH_DIRECTORY_FROM_FOR_TAR_ARCHIVE_MOD_WATCHER_NAME';
@@ -63,17 +65,19 @@ const onDirectoryFromTarArchiveChangeEvent = async (task, taskName, watchName, e
     // initiate 'Build from archive' flow
     try {
         logInfo(`Starting 'make build from archive' flow for task '${taskName}'`);
-        await makeBuildFromArchive(task);
+        logExeca(taskName, await makeBuildFromArchive(task));
 
         logInfo(`Starting 'copy .env file' flow for task '${taskName}'`);
-        await copyENVFile(task);
+        logExeca(taskName, await copyENVFile(task));
+
+        logInfo(`Stating 'run Laravel migrations' flow for task '${taskName}'`);
+        logExeca(taskName, await runLaravelMigrationsInCurrentBuild(task));
     } catch (error) {
-        console.error(error);
         logError(`Error while performing 'Laravel PHP Simple' flows for task '${taskName}': ${error.message}`);
     }
 
     // log end of the flow
-    logInfo(`Ending ''Laravel PHP Simple' flows for task '${taskName}'`);
+    logInfo(`Ending 'Laravel PHP Simple' flows for task '${taskName}'`);
 
     // set task state as inactive
     setTaskInactiveState(taskName);
