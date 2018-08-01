@@ -96,7 +96,8 @@ Task watches the directory specified in `pathToSourceFolder` for creation/modifi
 #### laravel_php_simple
 
 Similar too [pm2_nodejs_simple](pm2_nodejs_simple) except there will be not service reloading using `PM2`, but the `.env` (configuration file for `Laravel` framework) 
-file will be copied from `pathToDistFolder` directory to `current` build directory.
+file will be copied from `pathToDistFolder` directory to `current` build directory. Builder will also run migrations for current build as well as attempt to run default seeders if
+database is empty.
 
 ##### Options
 
