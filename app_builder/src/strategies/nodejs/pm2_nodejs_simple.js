@@ -60,7 +60,6 @@ const onDirectoryFromTarArchiveChangeEvent = async (task, taskName, watchName, e
     // log start of the flow
     logInfo(`Starting 'PM2 NodeJS Simple' flows for task '${taskName}'`);
 
-    // initiate 'Build from archive' flow
     try {
         logInfo(`Starting 'stop PM2 task by name silent' flow for task '${taskName}'`);
         logExeca(taskName, await stopPM2TaskByNameSilent(task));

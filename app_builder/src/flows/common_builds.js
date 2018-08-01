@@ -3,9 +3,10 @@
 // external imports
 const {resolve} = require('path');
 const {flow} = require('mobx');
-const {defaultTo} = require('ramda');
+const {isNil, defaultTo} = require('ramda');
 
 const execa = require('execa');
+const envfile = require('envfile');
 const moment = require('moment');
 
 // local imports
@@ -15,6 +16,11 @@ const {
 
     ENV_FILE_NAME
 } = require('./../constants/common_builds');
+
+const {
+    getPathToEnvFile,
+    gatPathToCurrentBuild
+} = require('./../helpers/common_builds');
 
 const {
     getPathToSourceArchiveFile,
@@ -61,9 +67,7 @@ function * startPM2TaskByEcosystemFile(task, cwd) {
 }
 
 function * startPM2TaskByEcosystemFileInCurrentBuild(task) {
-    const {pathToDistFolder} = task.currentConfig;
-    const cwd = resolve(pathToDistFolder, CURRENT_BUILD_DIRECTORY_NAME);
-
+    const cwd = gatPathToCurrentBuild(task);
     return yield * startPM2TaskByEcosystemFile(task, cwd)
 }
 
@@ -77,21 +81,25 @@ function * reloadPM2TaskByEcosystemFile(task, cwd) {
 }
 
 function * reloadPM2TaskByEcosystemFileInCurrentBuild(task) {
-    const {pathToDistFolder} = task.currentConfig;
-    const cwd = resolve(pathToDistFolder, CURRENT_BUILD_DIRECTORY_NAME);
-
+    const cwd = gatPathToCurrentBuild(task);
     return yield * reloadPM2TaskByEcosystemFile(task, cwd)
 }
 
 // throws error
 function * copyENVFile(task) {
-    const {pathToDistFolder} = task.currentConfig;
-
-    const envFileLocation = resolve(pathToDistFolder, ENV_FILE_NAME);
-    const currentBuildDirectoryLocation = resolve(pathToDistFolder, CURRENT_BUILD_DIRECTORY_NAME);
+    const envFileLocation = getPathToEnvFile(task);
+    const currentBuildDirectoryLocation = gatPathToCurrentBuild(task);
     const newEnvFileLocation = resolve(currentBuildDirectoryLocation, ENV_FILE_NAME);
 
     return yield execa('cp', [envFileLocation, newEnvFileLocation]);
+}
+
+function * parseEnvFile(task) {
+    const envFileLocation = getPathToEnvFile(task);
+
+    return yield new Promise((resolve, reject) => {
+        envfile.parseFile(envFileLocation, (error, parsedEnvObject) => isNil(error) ? resolve(parsedEnvObject) : reject(error))
+    });
 }
 
 function * makeBuildFromArchive(task) {
@@ -145,4 +153,6 @@ exports.reloadPM2TaskByEcosystemFile = flow(reloadPM2TaskByEcosystemFile);
 exports.reloadPM2TaskByEcosystemFileInCurrentBuild = flow(reloadPM2TaskByEcosystemFileInCurrentBuild);
 
 exports.copyENVFile = flow(copyENVFile);
+exports.parseEnvFile = flow(parseEnvFile);
+
 exports.makeBuildFromArchive = flow(makeBuildFromArchive);

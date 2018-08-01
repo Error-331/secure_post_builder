@@ -24,7 +24,7 @@ const {
 const {addWatchDescriptorToTask, setTaskBusyState, setTaskInactiveState, setTaskErroneousState} = require('./../../actions/tasks');
 
 const {copyENVFile, makeBuildFromArchive} = require('./../../flows/common_builds');
-const {runLaravelMigrationsInCurrentBuild} = require('./../../flows/php');
+const {runLaravelMigrationsInCurrentBuild, runLaravelSeedsInCurrentBuild} = require('./../../flows/php/laravel');
 
 // implementation
 const WATCH_DIRECTORY_FROM_FOR_TAR_ARCHIVE_MOD_WATCHER_NAME = 'WATCH_DIRECTORY_FROM_FOR_TAR_ARCHIVE_MOD_WATCHER_NAME';
@@ -62,7 +62,6 @@ const onDirectoryFromTarArchiveChangeEvent = async (task, taskName, watchName, e
     // log start of the flow
     logInfo(`Starting 'Laravel PHP Simple' flows for task '${taskName}'`);
 
-    // initiate 'Build from archive' flow
     try {
         logInfo(`Starting 'make build from archive' flow for task '${taskName}'`);
         logExeca(taskName, await makeBuildFromArchive(task));
@@ -72,6 +71,9 @@ const onDirectoryFromTarArchiveChangeEvent = async (task, taskName, watchName, e
 
         logInfo(`Stating 'run Laravel migrations' flow for task '${taskName}'`);
         logExeca(taskName, await runLaravelMigrationsInCurrentBuild(task));
+
+        logInfo(`Stating 'run Laravel seeds' flow for task '${taskName}'`);
+        logExeca(taskName, await runLaravelSeedsInCurrentBuild(task));
     } catch (error) {
         logError(`Error while performing 'Laravel PHP Simple' flows for task '${taskName}': ${error.message}`);
     }

@@ -92,6 +92,10 @@ function logExeca(taskName, execaResults) {
     }
 
     forEach((execaResult) => {
+        if (isNil(execaResult)) {
+            return;
+        }
+
         const isError = complement(isEmpty)(execaResult.stderr);
 
         currentLogger.log({

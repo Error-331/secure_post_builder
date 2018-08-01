@@ -19,7 +19,9 @@
     "execa": "^0.10.0",
     "inotify": "^1.4.2",
     "winston": "^3.0.0",
-    "winston-daily-rotate-file": "^3.2.3"
+    "winston-daily-rotate-file": "^3.2.3",
+    "envfile": "^2.3.0",
+    "mysql": "^2.16.0"
   },
   "devDependencies": {}
 }
