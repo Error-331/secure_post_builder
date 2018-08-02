@@ -24,7 +24,7 @@ const {
 const {addWatchDescriptorToTask, setTaskBusyState, setTaskInactiveState, setTaskErroneousState} = require('./../../actions/tasks');
 
 const {copyENVFile, makeBuildFromArchive} = require('./../../flows/common_builds');
-const {runLaravelMigrationsInCurrentBuild, runLaravelSeedsInCurrentBuild} = require('./../../flows/php/laravel');
+const {generateLaravelKey, runLaravelMigrationsInCurrentBuild, runLaravelSeedsInCurrentBuild} = require('./../../flows/php/laravel');
 
 // implementation
 const WATCH_DIRECTORY_FROM_FOR_TAR_ARCHIVE_MOD_WATCHER_NAME = 'WATCH_DIRECTORY_FROM_FOR_TAR_ARCHIVE_MOD_WATCHER_NAME';
@@ -68,6 +68,9 @@ const onDirectoryFromTarArchiveChangeEvent = async (task, taskName, watchName, e
 
         logInfo(`Starting 'copy .env file' flow for task '${taskName}'`);
         logExeca(taskName, await copyENVFile(task));
+
+        logInfo(`Starting 'generate Laravel key' flow for task '${taskName}'`);
+        logExeca(taskName, await generateLaravelKey(task));
 
         logInfo(`Stating 'run Laravel migrations' flow for task '${taskName}'`);
         logExeca(taskName, await runLaravelMigrationsInCurrentBuild(task));

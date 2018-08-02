@@ -12,6 +12,14 @@ const {parseEnvFile} = require('./../common_builds');
 const {getMySQLConnection, checkAtLeastOneTableNotEmpty, getDatabaseTablesList} = require('./../../helpers/mysql');
 
 // implementation
+function * generateLaravelKey(task) {
+    // prepare path to current build
+    const cwd = gatPathToCurrentBuild(task);
+
+    // generate Laravel application key
+    return yield execa('php', ['artisan', 'key:generate'], {cwd});
+}
+
 function * runLaravelMigrationsInCurrentBuild(task) {
     // prepare path to current build
     const cwd = gatPathToCurrentBuild(task);
@@ -23,7 +31,6 @@ function * runLaravelMigrationsInCurrentBuild(task) {
 function * runLaravelSeedsInCurrentBuild(task) {
     // parse .env file
     const envConfigObj = yield parseEnvFile(task);
-    console.log('------');
 
     // prepare sql connection configuration object
     const sqlConnectionConfigObject = {
@@ -58,5 +65,6 @@ function * runLaravelSeedsInCurrentBuild(task) {
 }
 
 // exports
+exports.generateLaravelKey = flow(generateLaravelKey);
 exports.runLaravelMigrationsInCurrentBuild = flow(runLaravelMigrationsInCurrentBuild);
 exports.runLaravelSeedsInCurrentBuild = flow(runLaravelSeedsInCurrentBuild);
