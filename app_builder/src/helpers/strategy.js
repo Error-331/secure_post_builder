@@ -8,7 +8,7 @@ const {F, tryCatch} = require('ramda');
 const {OLD_BUILD_DIRECTORY_NAME} = require('./../constants/common_builds');
 
 const {isPathReadableSync} = require('./file_system');
-const {gatPathToCurrentBuild} = require('./common_builds');
+const {getPathToCurrentBuild} = require('./common_builds');
 
 // implementation
 function getPathToSourceArchiveFile(task) {
@@ -37,7 +37,7 @@ function isOldBuildDirExistInDestinationDir(task) {
 }
 
 function isCurrentBuildDirExistInDestinationDir(task) {
-    const pathToDestinationCurrentBuildDir = gatPathToCurrentBuild(task);
+    const pathToDestinationCurrentBuildDir = getPathToCurrentBuild(task);
     return tryCatch(isPathReadableSync, F)(pathToDestinationCurrentBuildDir);
 }
 

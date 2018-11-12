@@ -1,49 +1,38 @@
 'use strict';
 
 // external imports
-const {isNil, equals, unless, ifElse, complement, defaultTo, curry} = require('ramda');
+const {equals, ifElse, defaultTo, curry} = require('ramda');
 const {List} = require('immutable');
 const debounce = require('lodash.debounce');
 
 // local imports
 const {TASK_INACTIVE_STATE} = require('./../../constants/tasks');
-const {FILE_WATCH_DOG_TIMEOUT, ARCHIVE_WATCH_DEBOUNCE_WAIT} = require('./../../constants/strategies');
+const {ARCHIVE_WATCH_DEBOUNCE_WAIT} = require('./../../constants/strategies');
+const {DEFAULT_PM2_ECOSYSTEM_CONFIG_FILE_NAME} = require('./../../constants/nodejs');
 
-const {logInfo, logWarn, logError, logInotifyEvent, logExeca} = require('./../../helpers/logs');
+const {logInfo, logWarn, logError, logExeca} = require('./../../helpers/logs');
 const {isPathReadableSync} = require('./../../helpers/file_system');
-const {isTaskStateBusy} = require('./../../helpers/tasks');
 const {
-    getTarArchiveCreatedInDirectoryMaxMasksInChain,
     addWatchDirectoryTarArchiveCreatedOrDeleted,
-
-    isTarArchiveCreatedInDirectory,
-    isFileDeletedInDirectory,
-    isTarArchiveCreatedInDirectoryByMaskChain
 } = require('./../../helpers/inotify');
+const {
+    getPathToFileInDistFolder,
+    getPathToFileInCurrentBuild
+} = require('./../../helpers/common_builds');
 
-const {addWatchDescriptorToTask, setTaskBusyState, setTaskInactiveState, setTaskErroneousState} = require('./../../actions/tasks');
-const {stopPM2TaskByNameSilent, reloadPM2TaskByEcosystemFileInCurrentBuild, makeBuildFromArchive} = require('./../../flows/common_builds');
+const {addWatchDescriptorToTask, setTaskErroneousState} = require('./../../actions/tasks');
+const {
+    copyFile,
+    deleteFileForce,
+    stopPM2TaskByNameSilent,
+    reloadPM2TaskByEcosystemFileInCurrentBuild,
+    makeBuildFromArchive
+} = require('./../../flows/common_builds');
+
+const {onDirectoryFromTarArchiveChangeByMask, onDirectoryFromTarArchiveChange} = require('./pm2_nodejs_simple');
 
 // implementation
 const WATCH_DIRECTORY_FROM_FOR_TAR_ARCHIVE_MOD_WATCHER_NAME = 'WATCH_DIRECTORY_FROM_FOR_TAR_ARCHIVE_MOD_WATCHER_NAME';
-
-function resetTaskState(task, taskName) {
-    logInfo(`Resetting state for task: '${taskName}'`);
-    unless(isNil, clearTimeout)(task.watchDogTimeoutId);
-
-    task.watchDogTimeoutId = null;
-    task.storedMasks = List();
-    task.onDirectoryFromTarArchiveChangeByMaskDebounce.cancel();
-}
-
-function initWatchDogTimer(task, taskName) {
-    logInfo(`Initiating watch dog timer for task: '${taskName}'`);
-
-    return setTimeout(() => {
-        logInfo(`Watch dog launched for task: '${taskName}'`);
-        resetTaskState(task, taskName);
-    }, defaultTo(FILE_WATCH_DOG_TIMEOUT)(task.currentConfig.fileWatchDogTimeout))
-}
 
 const initTaskFlows = async (task, taskName) => {
     // log start of the flow
@@ -53,8 +42,25 @@ const initTaskFlows = async (task, taskName) => {
         logInfo(`Starting 'stop PM2 task by name silent' flow for task '${taskName}'`);
         logExeca(taskName, await stopPM2TaskByNameSilent(task));
 
+        logInfo(`Deleting linux socket file' flow for task '${taskName}'`);
+        logExeca(taskName, await deleteFileForce(task, task.currentConfig.linuxSocketPath));
+
         logInfo(`Starting 'make build from archive' flow for task '${taskName}'`);
         logExeca(taskName, await makeBuildFromArchive(task));
+
+        logInfo(`Starting 'copy server specific config file' flow for task '${taskName}'`);
+        logExeca(taskName, await copyFile(
+            task,
+            getPathToFileInDistFolder(task, 'server_specific_config.json'),
+            getPathToFileInCurrentBuild(task, 'app_server/configs')
+            ));
+
+        logInfo(`Starting 'copy frontend config file' flow for task '${taskName}'`);
+        logExeca(taskName, await copyFile(
+            task,
+            getPathToFileInDistFolder(task, 'frontend_config.json'),
+            getPathToFileInCurrentBuild(task, 'app_front')
+        ));
 
         logInfo(`Starting 'reload PM2 task by ecosystem file in current build' flows for task '${taskName}'`);
         logExeca(taskName, await reloadPM2TaskByEcosystemFileInCurrentBuild(task));
@@ -67,58 +73,10 @@ const initTaskFlows = async (task, taskName) => {
     logInfo(`Ending 'PM2 NodeJS Simple' flows for task '${taskName}'`);
 };
 
-async function onDirectoryFromTarArchiveChangeByMask(flowFunction, task, taskName, watchName, event) {
-    if (!isTarArchiveCreatedInDirectoryByMaskChain(task.storedMasks.toArray())) {
-        // reset task state
-        return resetTaskState(task, taskName);
-    }
+const pm2NodejsHapijsWebFuturisticsCommon = (task, taskName) => {
+    // prepare additional task configuration
+    task.currentConfig.pm2EcosystemConfigFileLocation = defaultTo(`./app_server/${DEFAULT_PM2_ECOSYSTEM_CONFIG_FILE_NAME}`)(task.pm2EcosystemConfigFileLocation);
 
-    // set task state as busy
-    setTaskBusyState(taskName);
-
-    // reset task state
-    resetTaskState(task, taskName);
-
-    // start flow function
-    await flowFunction(task, taskName);
-
-    // set task state as inactive
-    setTaskInactiveState(taskName);
-}
-
-async function onDirectoryFromTarArchiveChange(task, taskName, watchName, event) {
-    const {archiveFileNameToWatch} = task.currentConfig;
-    const maxMasksInChain = getTarArchiveCreatedInDirectoryMaxMasksInChain();
-
-    if (isTarArchiveCreatedInDirectory(archiveFileNameToWatch, event)) {
-
-        if (isTaskStateBusy(task)) {
-            return;
-        }
-
-        logInotifyEvent(taskName, watchName, event);
-
-        if (task.storedMasks.size === 0 && complement(isNil)(task.watchDogTimeoutId)) {
-            task.watchDogTimeoutId = initWatchDogTimer(task, taskName);
-        }
-
-        if (task.storedMasks.size >= maxMasksInChain) {
-            task.storedMasks = task.storedMasks.shift();
-        }
-
-        task.storedMasks = task.storedMasks.push(event.mask);
-        task.onDirectoryFromTarArchiveChangeByMaskDebounce(task, taskName, watchName, event);
-
-        return true;
-    }
-
-    if (isFileDeletedInDirectory(archiveFileNameToWatch, event)) {
-        logInotifyEvent(taskName, watchName, event);
-        return resetTaskState(task, taskName);
-    }
-}
-
-const pm2NodejsSimple = (task, taskName) => {
     // prepare additional state for task
     task.watchDogTimeoutId = null;
     task.storedMasks = List();
@@ -166,9 +124,4 @@ const pm2NodejsSimple = (task, taskName) => {
 };
 
 // exports
-module.exports.resetTaskState = resetTaskState;
-module.exports.initWatchDogTimer = initWatchDogTimer;
-module.exports.initTaskFlows = initTaskFlows;
-module.exports.onDirectoryFromTarArchiveChangeByMask = onDirectoryFromTarArchiveChangeByMask;
-module.exports.onDirectoryFromTarArchiveChange = onDirectoryFromTarArchiveChange;
-module.exports.pm2NodejsSimple = pm2NodejsSimple;
+module.exports.pm2NodejsHapijsWebFuturisticsCommon = pm2NodejsHapijsWebFuturisticsCommon;

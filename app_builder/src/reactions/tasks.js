@@ -14,17 +14,17 @@ const {TASK_BUSY_STATE} = require('./../constants/tasks');
 reaction(() => {
     const taskNames = extractTasksNames(store.tasks);
 
-    const modifiedTasks = reduce((notBustTasksNamesAwaitingNewConfig, taskName) => {
+    const modifiedTasks = reduce((notBusyTasksNamesAwaitingNewConfig, taskName) => {
         const task = store.tasks[taskName];
 
         if (complement(equals)({}, task.newConfig) && task.state !== TASK_BUSY_STATE) {
-            notBustTasksNamesAwaitingNewConfig.push(taskName);
+            notBusyTasksNamesAwaitingNewConfig.push(taskName);
         }
 
-        return notBustTasksNamesAwaitingNewConfig;
+        return notBusyTasksNamesAwaitingNewConfig;
     }, [], taskNames);
 
     return unless(compose(gt(__, 0), length), always(undefined))(modifiedTasks);
-}, notBustTasksNamesAwaitingNewConfig => updateTasksConfig(notBustTasksNamesAwaitingNewConfig));
+}, notBusyTasksNamesAwaitingNewConfig => updateTasksConfig(notBusyTasksNamesAwaitingNewConfig));
 
 // exports

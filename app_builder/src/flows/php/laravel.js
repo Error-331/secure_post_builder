@@ -6,7 +6,7 @@ const execa = require('execa');
 const {without} = require('ramda');
 
 // local imports
-const {gatPathToCurrentBuild} = require('./../../helpers/common_builds');
+const {getPathToCurrentBuild} = require('./../../helpers/common_builds');
 
 const {parseEnvFile} = require('./../common_builds');
 const {getMySQLConnection, checkAtLeastOneTableNotEmpty, getDatabaseTablesList} = require('./../../helpers/mysql');
@@ -14,7 +14,7 @@ const {getMySQLConnection, checkAtLeastOneTableNotEmpty, getDatabaseTablesList} 
 // implementation
 function * generateLaravelKey(task) {
     // prepare path to current build
-    const cwd = gatPathToCurrentBuild(task);
+    const cwd = getPathToCurrentBuild(task);
 
     // generate Laravel application key
     return yield execa('php', ['artisan', 'key:generate'], {cwd});
@@ -22,7 +22,7 @@ function * generateLaravelKey(task) {
 
 function * runLaravelMigrationsInCurrentBuild(task) {
     // prepare path to current build
-    const cwd = gatPathToCurrentBuild(task);
+    const cwd = getPathToCurrentBuild(task);
 
     // start pm2 tasks using ecosystem config file
     return yield execa('php', ['artisan', 'migrate'], {cwd});
@@ -54,7 +54,7 @@ function * runLaravelSeedsInCurrentBuild(task) {
 
     if (!isNotDatabaseEmpty) {
         // prepare path to current build
-        const cwd = gatPathToCurrentBuild(task);
+        const cwd = getPathToCurrentBuild(task);
 
         // 'seed' database with values
         return yield execa('php', ['artisan', 'db:seed'], {cwd});

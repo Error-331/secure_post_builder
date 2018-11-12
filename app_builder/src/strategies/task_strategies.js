@@ -15,7 +15,9 @@ function taskStrategyPatternFactory(strategyName) {
         case 'main_config_json_watcher_task':
             return mainConfigJSONWatcherTaskStrategy;
         case 'pm2_nodejs_simple':
-            return require('./nodejs/pm2_nodejs_simple');
+            return require('./nodejs/pm2_nodejs_simple').pm2NodejsSimple;
+        case 'pm2_nodejs_hapijs_web_futuristics_common':
+            return require('./nodejs/pm2_nodejs_hapijs_web_futuristics_common').pm2NodejsHapijsWebFuturisticsCommon;
         case 'laravel_php_simple':
             return require('./php/laravel_php_simple');
         default:

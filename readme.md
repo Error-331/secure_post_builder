@@ -151,3 +151,19 @@ IN_DELETE        - 512 <br/>
 IN_DELETE_SELF   - 1024 <br/>
 IN_MOVE_SELF     - 2048
 
+## TODO
+
+- .tar archive creation at first time do not work - investigate and fix;
+- if dist not exist - try to create it;
+- if config reloads - need to somehow delete all watchers (if directory was deleted from outside - its watcher will be deleted by the system - double check);
+
+
+    // if file system entities check fails, set erroneous state for current task
+    if (equals(isFSEntitiesAccessible, false)) {
+        return setTaskErroneousState(taskName);
+    }
+    
+    - log here also;
+    
+    External Deletion Command(jenkins) : rm -rf %s
+
