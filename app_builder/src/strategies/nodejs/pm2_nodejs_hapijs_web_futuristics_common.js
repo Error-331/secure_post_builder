@@ -24,10 +24,13 @@ const {addWatchDescriptorToTask, setTaskErroneousState} = require('./../../actio
 const {
     copyFile,
     deleteFileForce,
-    stopPM2TaskByNameSilent,
-    reloadPM2TaskByEcosystemFileInCurrentBuild,
     makeBuildFromArchive
 } = require('./../../flows/common_builds');
+const {
+    runNPMTask,
+    stopPM2TaskByNameSilent,
+    reloadPM2TaskByEcosystemFileInCurrentBuild,
+} = require('./../../flows/nodejs/common_nodejs_builds');
 
 const {onDirectoryFromTarArchiveChangeByMask, onDirectoryFromTarArchiveChange} = require('./pm2_nodejs_simple');
 
@@ -61,6 +64,9 @@ const initTaskFlows = async (task, taskName) => {
             getPathToFileInDistFolder(task, 'frontend_config.json'),
             getPathToFileInCurrentBuild(task, 'app_front')
         ));
+
+        logInfo(`Starting 'run NPM task' flow for task '${taskName}'`);
+        logExeca(taskName, await runNPMTask(task, 'build-frontend-production'));
 
         logInfo(`Starting 'reload PM2 task by ecosystem file in current build' flows for task '${taskName}'`);
         logExeca(taskName, await reloadPM2TaskByEcosystemFileInCurrentBuild(task));

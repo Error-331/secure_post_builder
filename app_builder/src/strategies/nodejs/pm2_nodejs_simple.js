@@ -22,7 +22,8 @@ const {
 } = require('./../../helpers/inotify');
 
 const {addWatchDescriptorToTask, setTaskBusyState, setTaskInactiveState, setTaskErroneousState} = require('./../../actions/tasks');
-const {stopPM2TaskByNameSilent, reloadPM2TaskByEcosystemFileInCurrentBuild, makeBuildFromArchive} = require('./../../flows/common_builds');
+const {makeBuildFromArchive} = require('./../../flows/common_builds');
+const {stopPM2TaskByNameSilent, reloadPM2TaskByEcosystemFileInCurrentBuild} = require('./../../flows/nodejs/common_nodejs_builds');
 
 // implementation
 const WATCH_DIRECTORY_FROM_FOR_TAR_ARCHIVE_MOD_WATCHER_NAME = 'WATCH_DIRECTORY_FROM_FOR_TAR_ARCHIVE_MOD_WATCHER_NAME';
