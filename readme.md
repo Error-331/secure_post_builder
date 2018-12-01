@@ -68,6 +68,8 @@ Task watches the directory specified in `pathToSourceFolder` for creation/modifi
 `archiveFileNameToWatch` - name of the archive file (in `pathToSourceFolder` directory) which will be monitored for changes;
   
 `pm2TaskName` - name of the PM2 task which should be restarted during task work;
+
+`pm2Options` - command line options which will be passed to PM2;
   
 `fileWatchDogTimeout` - timeout in milliseconds after which internal state of the task will be reseted (to prevent erroneous behaviour, default is 6000);
 
@@ -87,6 +89,60 @@ Task watches the directory specified in `pathToSourceFolder` for creation/modifi
       "pathToDistFolder": "/home/someuser/testto",
       "archiveFileNameToWatch": "testfrom.tar.gz",
       "pm2TaskName": "js_ui_components"
+    }
+  }
+}
+
+```
+
+#### pm2_nodejs_hapijs_web_futuristics_common
+
+Task watches the directory specified in `pathToSourceFolder` for creation/modification of `archiveFileNameToWatch`. Each time the `archiveFileNameToWatch` is changed it is being copied to
+`pathToDistFolder` where it will be extracted to `current` build directory while previous `current` build directory will be renamed to `old_build`. Prior to deleting previous build, the UNIX 
+socket (used by server is also deleted) will be deleted as well. Before reloading the PM2 task, builder will try to build frontend files by means of running `build-frontend-production` NPM task.
+Relevant PM2 services will be restarted.
+
+##### Options
+
+`strategy` - strategy name (should be `pm2_nodejs_hapijs_web_futuristics_common`);
+
+`label` - literal representation of the task (any string);
+
+`pathToSourceFolder` - path to source directory where archive with source code resides;
+
+`pathToDistFolder` - path to destination directory where unpacking of source code archive will take place;
+
+`archiveFileNameToWatch` - name of the archive file (in `pathToSourceFolder` directory) which will be monitored for changes;
+  
+`pm2TaskName` - name of the PM2 task which should be restarted during task work;
+
+`pm2Options` - command line options which will be passed to PM2;
+
+`linuxSocketPath` - path to UNIX socket file created by the server (it will be deleted);
+  
+`fileWatchDogTimeout` - timeout in milliseconds after which internal state of the task will be reseted (to prevent erroneous behaviour, default is 6000);
+
+`archiveWatchDebounceWait` - timeout in milliseconds after which task will initiate its strategy after necessary Inotify events were captured (default is 4000);
+
+##### Example
+
+```json
+
+{
+  "tasks": {
+    "testNodeJSTaskHapiCommonWebFuturistics": {
+      "strategy": "pm2_nodejs_hapijs_web_futuristics_common",
+      "label": "Frontend service (web futuristics development)",
+
+      "pathToSourceFolder": "/home/someuser/testfromnode1",
+      "pathToDistFolder": "/home/someuser/testtonode1",
+      "archiveFileNameToWatch": "testfrom.tar.gz",
+      "pm2TaskName": "hr_frontend_service_production_development",
+      "pm2Options": "--only hr_frontend_service_production_development",
+      "linuxSocketPath": "./hr_front_service_socket",
+
+      "fileWatchDogTimeout": 6000,
+      "archiveWatchDebounceWait": 4000
     }
   }
 }
@@ -125,8 +181,8 @@ database is empty.
       "strategy": "laravel_php_simple",
       "label": "Backend service (development)",
 
-      "pathToSourceFolder": "/home/sergei-331/testfromphp",
-      "pathToDistFolder": "/home/sergei-331/testtophp",
+      "pathToSourceFolder": "/home/someuser/testfromphp",
+      "pathToDistFolder": "/home/someuser/testtophp",
       "archiveFileNameToWatch": "testfrom.tar.gz"
     }
   }

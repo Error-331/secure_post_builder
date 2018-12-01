@@ -46,7 +46,10 @@ const initTaskFlows = async (task, taskName) => {
         logExeca(taskName, await stopPM2TaskByNameSilent(task));
 
         logInfo(`Deleting linux socket file' flow for task '${taskName}'`);
-        logExeca(taskName, await deleteFileForce(task, task.currentConfig.linuxSocketPath));
+        logExeca(taskName, await deleteFileForce(
+            task,
+            getPathToFileInCurrentBuild(task, task.currentConfig.linuxSocketPath)
+        ));
 
         logInfo(`Starting 'make build from archive' flow for task '${taskName}'`);
         logExeca(taskName, await makeBuildFromArchive(task));
