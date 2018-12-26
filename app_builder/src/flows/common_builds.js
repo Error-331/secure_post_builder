@@ -17,12 +17,7 @@ const {
 } = require('./../constants/common_builds');
 
 const {
-    DEFAULT_PM2_ECOSYSTEM_CONFIG_FILE_NAME
-} = require('./../constants/nodejs');
-
-const {
     getPathToEnvFile,
-    getPathToCurrentBuild,
     getPathToFileInCurrentBuild
 } = require('./../helpers/common_builds');
 
@@ -65,7 +60,7 @@ function * copyENVFile(task) {
     const envFileLocation = getPathToEnvFile(task);
     const newEnvFileLocation = getPathToFileInCurrentBuild(task, ENV_FILE_NAME);
 
-    return yield copyFile(task, envFileLocation, newEnvFileLocation);
+    return yield * copyFile(task, envFileLocation, newEnvFileLocation);
 }
 
 function * parseEnvFile(task) {
