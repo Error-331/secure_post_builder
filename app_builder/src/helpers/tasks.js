@@ -2,8 +2,11 @@
 
 // external imports
 const {unless, isNil, equals, defaultTo, keysIn, pathEq, pickBy, intersection, curry, omit, clone, concat, reduce, mergeDeepRight} = require('ramda');
+const {List} = require('immutable');
 
 // local imports
+const {logInfo} = require('./logs');
+
 const {
     PATH_TO_TASKS_JSON,
     RESTRICTED_TASKS_NAMES,
@@ -22,6 +25,15 @@ const {
 function reloadJSONTasks() {
     unless(isNil, () => delete require.cache[PATH_TO_TASKS_JSON])(require.cache[PATH_TO_TASKS_JSON]);
     return require(PATH_TO_TASKS_JSON);
+}
+
+function resetTaskArchiveWatchState(task, taskName) {
+    logInfo(`Resetting state for task: '${taskName}'`);
+    unless(isNil, clearTimeout)(task.watchDogTimeoutId);
+
+    task.watchDogTimeoutId = null;
+    task.storedMasks = List();
+    task.onDirectoryFromTarArchiveChangeByMaskDebounce.cancel();
 }
 
 function extractTasksNames(tasks) {
@@ -99,6 +111,7 @@ function mergeTasksCreateIfNotExist(tasks, jsonTasks) {
 
 // exports
 exports.reloadJSONTasks = reloadJSONTasks;
+exports.resetTaskArchiveWatchState = resetTaskArchiveWatchState;
 
 exports.extractTasksNames = extractTasksNames;
 exports.extractSkippedTasksNames = extractSkippedTasksNames;

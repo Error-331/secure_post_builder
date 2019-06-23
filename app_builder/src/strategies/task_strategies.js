@@ -17,7 +17,9 @@ function taskStrategyPatternFactory(strategyName) {
         case 'pm2_nodejs_simple':
             return require('./nodejs/pm2_nodejs_simple').pm2NodejsSimple;
         case 'pm2_nodejs_hapijs_web_futuristics_common':
-            return require('./nodejs/pm2_nodejs_hapijs_web_futuristics_common').pm2NodejsHapijsWebFuturisticsCommon;
+            return require('./nodejs/pm2_nodejs_hapijs_web_futuristics_common').pm2NodejsHapiJSWebFuturisticsCommon;
+        case 'pm2_nodejs_Hapijs_web_futuristics_lerna':
+            return require('./nodejs/pm2_nodejs_hapijs_web_futuristics_lerna').pm2NodejsHapiJSWebFuturisticsLerna;
         case 'laravel_php_simple':
             return require('./php/laravel_php_simple');
         default:

@@ -7,6 +7,7 @@ const {resolve} = require('path');
 const {CURRENT_BUILD_DIRECTORY_NAME, ENV_FILE_NAME} = require('./../constants/common_builds');
 
 // implementation
+
 function getPathToFileInDistFolder(task, fileName) {
     const {pathToDistFolder} = task.currentConfig;
     return resolve(pathToDistFolder, fileName);
@@ -20,6 +21,12 @@ function getPathToCurrentBuild(task) {
 function getPathToFileInCurrentBuild(task, fileName) {
     const currentBuildDirectoryLocation = getPathToCurrentBuild(task);
     return resolve(currentBuildDirectoryLocation, fileName);
+}
+
+function getPathToFileInCurrentLernaBuild(task, fileName) {
+    const currentBuildDirectoryLocation = getPathToCurrentBuild(task);
+    const {relativeLernaAppPath} = task.currentConfig;
+    return resolve(currentBuildDirectoryLocation, relativeLernaAppPath, fileName);
 }
 
 function getPathToEnvFile(task) {
