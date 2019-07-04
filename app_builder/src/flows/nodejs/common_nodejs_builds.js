@@ -13,6 +13,7 @@ const {
 
 const {
     getPathToCurrentBuild,
+    getPathToDirectoryInCurrentBuild,
 } = require('./../../helpers/common_builds');
 
 // implementation
@@ -22,6 +23,14 @@ function * runNPMTask(task, npmTaskName) {
 
     // run npm task
     return yield execa('npm', ['run', npmTaskName], {cwd});
+}
+
+function * runNPMTaskInSubDir(task, taskName, flowConfig) {
+    // get path to directory in current build
+    const cwd = getPathToDirectoryInCurrentBuild(task, flowConfig.path);
+
+    // run npm task
+    return yield execa('npm', ['run', flowConfig.npmTaskName], {cwd});
 }
 
 function * stopPM2TaskByName(task) {
@@ -85,6 +94,7 @@ function * reloadPM2TaskByEcosystemFileInCurrentBuild(task) {
 
 // exports
 exports.runNPMTask = flow(runNPMTask);
+exports.runNPMTaskInSubDir = flow(runNPMTaskInSubDir);
 
 exports.stopPM2TaskByName = flow(stopPM2TaskByName);
 exports.stopPM2TaskByNameSilent = flow(stopPM2TaskByNameSilent);
