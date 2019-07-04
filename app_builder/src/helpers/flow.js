@@ -38,7 +38,7 @@ async function executeFlow(task, taskName, flowConfig) {
     const {name, description} = flowConfig;
     const flowFunction = findFlowByName(name);
 
-    unless(isNil, (desc) => logInfo(`${desc} - '${taskName}'`))(description);
+    unless(isNil, (desc) => logInfo(`${desc} - '${taskName}'`, taskName))(description);
     return await flowFunction(task, taskName, flowConfig);
 }
 
