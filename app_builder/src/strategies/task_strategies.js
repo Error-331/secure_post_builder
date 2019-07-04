@@ -22,6 +22,8 @@ function taskStrategyPatternFactory(strategyName) {
             return require('./nodejs/pm2_nodejs_hapijs_web_futuristics_lerna').pm2NodejsHapiJSWebFuturisticsLerna;
         case 'laravel_php_simple':
             return require('./php/laravel_php_simple');
+        case 'freestyle':
+            return require('./misc/freestyle').freestyle;
         default:
             logWarn(`Cannot find strategy for strategy named: ${strategyName}`);
             return null;

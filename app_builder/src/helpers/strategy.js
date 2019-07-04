@@ -13,10 +13,9 @@ const {logInfo, logWarn} = require('./logs');
 const {isPathReadableSync} = require('./file_system');
 const {getPathToCurrentBuild} = require('./common_builds');
 const {addWatchDirectoryTarArchiveCreatedOrDeleted} = require('./inotify');
-const {resetTaskArchiveWatchState} = require('./tasks');
 
 const {onDirectoryFromTarArchiveChange, onDirectoryFromTarArchiveChangeByMask} = require('./../handlers/directory_change');
-const {addWatchDescriptorToTask, setTaskErroneousState} = require('./../actions/tasks');
+const {addWatchDescriptorToTask, setTaskErroneousState, resetTaskArchiveWatchState} = require('./../actions/tasks');
 
 const {TASK_INACTIVE_STATE} = require('./../constants/tasks');
 const {ARCHIVE_WATCH_DEBOUNCE_WAIT, FILE_WATCH_DOG_TIMEOUT} = require('./../constants/strategies');

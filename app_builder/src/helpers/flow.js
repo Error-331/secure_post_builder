@@ -1,6 +1,7 @@
 'use strict';
 
 // external imports
+const {isNil, unless} = require('ramda');
 
 // local imports
 const {logInfo, logExeca} = require('./logs');
@@ -34,9 +35,10 @@ function findFlowByName(flowName) {
 }
 
 async function executeFlow(task, taskName, flowConfig) {
-    const {name} = flowConfig;
+    const {name, description} = flowConfig;
     const flowFunction = findFlowByName(name);
 
+    unless(isNil, (desc) => logInfo(`${desc} - '${taskName}'`))(description);
     return await flowFunction(task, taskName, flowConfig);
 }
 

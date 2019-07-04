@@ -2,6 +2,7 @@
 
 // external imports
 const {action} = require('mobx');
+const {List} = require('immutable');
 const {unless, isNil, equals, curry, keysIn, forEach, omit, mergeDeepRight, values} = require('ramda');
 
 // local imports
@@ -75,6 +76,15 @@ function updateTasksConfig(tasksNames) {
     logInfo(`Tasks (${tasksNames}) configurations updated...`);
 }
 
+function resetTaskArchiveWatchState(task, taskName) {
+    logInfo(`Resetting state for task: '${taskName}'`);
+    unless(isNil, clearTimeout)(task.watchDogTimeoutId);
+
+    task.watchDogTimeoutId = null;
+    task.storedMasks = List();
+    task.onDirectoryFromTarArchiveChangeByMaskDebounce.cancel();
+}
+
 function removeTaskWatchDescriptor(taskName, watchDescriptorName) {
     logInfo(`Removing watch descriptor(${watchDescriptorName}) for task '${taskName}'...`);
     removeWatcher(store.tasks[taskName].watchDescriptors[watchDescriptorName]);
@@ -119,6 +129,8 @@ exports.reloadJSONTasksAction = action(reloadJSONTasksAction);
 
 exports.updateTaskConfig = action(curry(updateTaskConfig));
 exports.updateTasksConfig = action(curry(updateTasksConfig));
+
+exports.resetTaskArchiveWatchState = resetTaskArchiveWatchState;
 
 exports.removeTaskWatchDescriptor = action(curry(removeTaskWatchDescriptor));
 exports.clearTaskWatchDescriptors = action(curry(clearTaskWatchDescriptors));

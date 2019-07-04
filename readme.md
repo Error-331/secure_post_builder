@@ -213,30 +213,40 @@ like in the example bellow. List of possible `freestyle` commands can be found b
       "tasks": [
         {
           "name": "stopPM2TaskSilent",
+          "description": "stop PM2 task by name silent",
+          
           "pm2TaskName": "some_task"
         },
 
         {
           "name": "deleteFileInCurrentBuild",
+          "description": "Delete linux socket file",
+          
           "path": "./home/someuser/testfrom/apps/backend/server/socket"
         },
 
         {
-          "name": "makeBuildFromArchive"
+          "name": "makeBuildFromArchive",
+          "description": "Copy project files from 'source' to 'dist'"
         },
 
         {
-          "name": "bootstrapLerna"
+          "name": "bootstrapLerna",
+          "description": "Bootstrap Lerna"
         },
 
         {
           "name": "copyFileFromDistToBuild",
+          "description": "Copy frontend config JSON",
+          
           "from": "./config.json",
           "to": "./apps/frontend/front/config.json"
         },
 
         {
           "name": "runNPMTaskInSubDir",
+          "description": "Build client",
+          
           "npmTaskName": "build-production",
           "path": "./apps/frontend/front"
         }

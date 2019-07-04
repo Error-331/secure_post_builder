@@ -1,10 +1,12 @@
 'use strict';
 
 // external imports
-import {complement} from 'ramda';
+const {isNil, complement} = require('ramda');
 
 // local imports
-const {isTaskStateBusy, resetTaskArchiveWatchState, setTaskBusyState, setTaskInactiveState,} = require('./../helpers/tasks');
+const {setTaskBusyState, setTaskInactiveState, resetTaskArchiveWatchState} = require('./../actions/tasks');
+
+const {isTaskStateBusy} = require('./../helpers/tasks');
 const {logInotifyEvent} = require('./../helpers/logs');
 const {initWatchDogTimer} = require('./../helpers/strategy');
 const {
