@@ -190,6 +190,73 @@ database is empty.
 
 ```
 
+#### Freestyle
+
+Strategy that gives possibility to run nearly any kind of `flow` functions (functions which do any sort of task in your project like running `NPM` tasks or copying files).
+Note that files will not be copied from `pathToDistFolder` directory to `current` build directory automatically. For this you need to include `makeBuildFromArchive` task in the list of `tasks`
+like in the example bellow. List of possible `freestyle` commands can be found bellow in section [Freestyle tasks](Freestyle tasks).
+
+##### Example
+
+```json
+
+{
+  "tasks": {
+    "testFreestyleNodeJSTask": {
+      "strategy": "freestyle",
+      "label": "Backend freestyle service (development)",
+
+      "pathToSourceFolder": "/home/someuser/testfrom",
+      "pathToDistFolder": "/home/someuser/testto",
+      "archiveFileNameToWatch": "testfrom.tar.gz",
+
+      "tasks": [
+        {
+          "name": "stopPM2TaskSilent",
+          "pm2TaskName": "some_task"
+        },
+
+        {
+          "name": "deleteFileInCurrentBuild",
+          "path": "./home/someuser/testfrom/apps/backend/server/socket"
+        },
+
+        {
+          "name": "makeBuildFromArchive"
+        },
+
+        {
+          "name": "bootstrapLerna"
+        },
+
+        {
+          "name": "copyFileFromDistToBuild",
+          "from": "./config.json",
+          "to": "./apps/frontend/front/config.json"
+        },
+
+        {
+          "name": "runNPMTaskInSubDir",
+          "npmTaskName": "build-production",
+          "path": "./apps/frontend/front"
+        }
+      ]
+    }
+  }
+}
+
+```
+
+## Freestyle tasks
+
+### stopPM2TaskSilent
+
+Stops named `PM2` task for current OS user.
+
+#### Options
+
+`pm2TaskName` - name of the `PM2` task;
+
 ## Inotify
 
 ### Watch flags to decimal numbers
