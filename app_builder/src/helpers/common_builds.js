@@ -23,12 +23,6 @@ function getPathToFileInCurrentBuild(task, fileName) {
     return resolve(currentBuildDirectoryLocation, fileName);
 }
 
-function getPathToFileInCurrentLernaBuild(task, fileName) {
-    const currentBuildDirectoryLocation = getPathToCurrentBuild(task);
-    const {relativeLernaAppPath} = task.currentConfig;
-    return resolve(currentBuildDirectoryLocation, relativeLernaAppPath, fileName);
-}
-
 function getPathToEnvFile(task) {
     return getPathToFileInDistFolder(task, ENV_FILE_NAME);
 }
@@ -37,4 +31,5 @@ function getPathToEnvFile(task) {
 exports.getPathToFileInDistFolder = getPathToFileInDistFolder;
 exports.getPathToCurrentBuild = getPathToCurrentBuild;
 exports.getPathToFileInCurrentBuild = getPathToFileInCurrentBuild;
+exports.getPathToDirectoryInCurrentBuild = getPathToFileInCurrentBuild; // alias
 exports.getPathToEnvFile = getPathToEnvFile;
