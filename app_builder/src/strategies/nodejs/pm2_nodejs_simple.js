@@ -13,24 +13,24 @@ const {runCommonStrategy} = require('./../../helpers/strategy');
 // implementation
 const initTaskFlows = async (task, taskName) => {
     // log start of the flow
-    logInfo(`Starting 'PM2 NodeJS Simple' flows for task '${taskName}'`);
+    logInfo(`Starting 'PM2 NodeJS Simple' flows for task '${taskName}'`, taskName);
 
     try {
-        logInfo(`Starting 'stop PM2 task by name silent' flow for task '${taskName}'`);
+        logInfo(`Starting 'stop PM2 task by name silent' flow for task '${taskName}'`, taskName);
         logExeca(taskName, await stopPM2TaskByNameSilent(task));
 
-        logInfo(`Starting 'make build from archive' flow for task '${taskName}'`);
+        logInfo(`Starting 'make build from archive' flow for task '${taskName}'`, taskName);
         logExeca(taskName, await makeBuildFromArchive(task));
 
-        logInfo(`Starting 'reload PM2 task by ecosystem file in current build' flows for task '${taskName}'`);
+        logInfo(`Starting 'reload PM2 task by ecosystem file in current build' flows for task '${taskName}'`, taskName);
         logExeca(taskName, await reloadPM2TaskByEcosystemFileInCurrentBuild(task));
     } catch (error) {
         console.error(error);
-        logError(`Error while performing 'PM2 NodeJS Simple' flows for task '${taskName}': ${error.message}`);
+        logError(`Error while performing 'PM2 NodeJS Simple' flows for task '${taskName}': ${error.message}`, taskName);
     }
 
     // log end of the flow
-    logInfo(`Ending 'PM2 NodeJS Simple' flows for task '${taskName}'`);
+    logInfo(`Ending 'PM2 NodeJS Simple' flows for task '${taskName}'`, taskName);
 };
 
 const pm2NodejsSimple = (task, taskName) => {

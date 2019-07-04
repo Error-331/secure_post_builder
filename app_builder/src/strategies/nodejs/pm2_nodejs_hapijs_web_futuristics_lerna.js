@@ -39,47 +39,47 @@ const {runCommonStrategy} = require('./../../helpers/strategy');
 // implementation
 const initTaskFlows = async (task, taskName) => {
     // log start of the flow
-    logInfo(`Starting 'PM2 NodeJS HapiJS WebFuturistics lerna' flows for task '${taskName}'`);
+    logInfo(`Starting 'PM2 NodeJS HapiJS WebFuturistics lerna' flows for task '${taskName}'`, taskName);
 
     try {
-        logInfo(`Starting 'stop PM2 task by name silent' flow for task '${taskName}'`);
+        logInfo(`Starting 'stop PM2 task by name silent' flow for task '${taskName}'`, taskName);
         logExeca(taskName, await stopPM2TaskByNameSilent(task));
 
-        logInfo(`Deleting linux socket file' flow for task '${taskName}'`);
+        logInfo(`Deleting linux socket file' flow for task '${taskName}'`, taskName);
         logExeca(taskName, await deleteFileForce(
             task,
             getPathToFileInCurrentLernaBuild(task, task.currentConfig.linuxSocketPath)
         ));
 
-        logInfo(`Starting 'make build from archive' flow for task '${taskName}'`);
+        logInfo(`Starting 'make build from archive' flow for task '${taskName}'`, taskName);
         logExeca(taskName, await makeBuildFromArchive(task));
 
-        logInfo(`Starting 'copy server specific config file' flow for task '${taskName}'`);
+        logInfo(`Starting 'copy server specific config file' flow for task '${taskName}'`, taskName);
         logExeca(taskName, await copyFile(
             task,
             getPathToFileInDistFolder(task, 'server_specific_config.json'),
             getPathToFileInCurrentLernaBuild(task, 'app_server/configs')
         ));
 
-        logInfo(`Starting 'copy frontend config file' flow for task '${taskName}'`);
+        logInfo(`Starting 'copy frontend config file' flow for task '${taskName}'`, taskName);
         logExeca(taskName, await copyFile(
             task,
             getPathToFileInDistFolder(task, 'frontend_config.json'),
             getPathToFileInCurrentLernaBuild(task, 'app_front')
         ));
 
-        logInfo(`Starting 'run NPM task' flow for task '${taskName}'`);
+        logInfo(`Starting 'run NPM task' flow for task '${taskName}'`, taskName);
         logExeca(taskName, await runNPMTask(task, 'build-frontend-production'));
 
-        logInfo(`Starting 'reload PM2 task by ecosystem file in current build' flows for task '${taskName}'`);
+        logInfo(`Starting 'reload PM2 task by ecosystem file in current build' flows for task '${taskName}'`, taskName);
         logExeca(taskName, await reloadPM2TaskByEcosystemFileInCurrentBuild(task));
     } catch (error) {
         console.error(error);
-        logError(`Error while performing 'PM2 NodeJS HapiJS WebFuturistics lerna' flows for task '${taskName}': ${error.message}`);
+        logError(`Error while performing 'PM2 NodeJS HapiJS WebFuturistics lerna' flows for task '${taskName}': ${error.message}`, taskName);
     }
 
     // log end of the flow
-    logInfo(`Ending 'PM2 NodeJS HapiJS WebFuturistics lerna' flows for task '${taskName}'`);
+    logInfo(`Ending 'PM2 NodeJS HapiJS WebFuturistics lerna' flows for task '${taskName}'`, taskName);
 };
 
 const pm2NodejsHapiJSWebFuturisticsLerna = (task, taskName) => {
