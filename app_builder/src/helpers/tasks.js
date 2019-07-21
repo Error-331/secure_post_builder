@@ -2,8 +2,11 @@
 
 // external imports
 const {unless, isNil, equals, defaultTo, keysIn, pathEq, pickBy, intersection, curry, omit, clone, concat, reduce, mergeDeepRight} = require('ramda');
+const {List} = require('immutable');
 
 // local imports
+const {logInfo} = require('./logs');
+
 const {
     PATH_TO_TASKS_JSON,
     RESTRICTED_TASKS_NAMES,

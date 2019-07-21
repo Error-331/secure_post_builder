@@ -7,6 +7,7 @@ const {resolve} = require('path');
 const {CURRENT_BUILD_DIRECTORY_NAME, ENV_FILE_NAME} = require('./../constants/common_builds');
 
 // implementation
+
 function getPathToFileInDistFolder(task, fileName) {
     const {pathToDistFolder} = task.currentConfig;
     return resolve(pathToDistFolder, fileName);
@@ -30,4 +31,5 @@ function getPathToEnvFile(task) {
 exports.getPathToFileInDistFolder = getPathToFileInDistFolder;
 exports.getPathToCurrentBuild = getPathToCurrentBuild;
 exports.getPathToFileInCurrentBuild = getPathToFileInCurrentBuild;
+exports.getPathToDirectoryInCurrentBuild = getPathToFileInCurrentBuild; // alias
 exports.getPathToEnvFile = getPathToEnvFile;

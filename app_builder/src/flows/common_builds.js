@@ -17,8 +17,10 @@ const {
 } = require('./../constants/common_builds');
 
 const {
+    getPathToFileInDistFolder,
     getPathToEnvFile,
-    getPathToFileInCurrentBuild
+    getPathToFileInCurrentBuild,
+    getPathToCurrentBuild,
 } = require('./../helpers/common_builds');
 
 const {
@@ -51,8 +53,21 @@ function * deleteFileForce(task, pathToFile, options, cwd) {
     return yield * deleteFile(task, pathToFile, options, cwd);
 }
 
+function * deleteFileInCurrentBuild(task, taskName, flowConfig) {
+    const cwd = getPathToCurrentBuild(task);
+    return yield * deleteFileForce(task, flowConfig.path, [], cwd);
+}
+
 function * copyFile(task, from, to, cwd) {
     return yield execa('cp', [from, to], {cwd});
+}
+
+// throws error
+function * copyFileFromDistToBuild(task, taskName, flowConfig) {
+    const fileLocation = getPathToFileInDistFolder(task, flowConfig.from);
+    const newFileLocation = getPathToFileInCurrentBuild(task, flowConfig.to);
+
+    return yield * copyFile(task, fileLocation, newFileLocation);
 }
 
 // throws error
@@ -116,7 +131,9 @@ function * makeBuildFromArchive(task) {
 // exports
 exports.deleteFile = flow(deleteFile);
 exports.deleteFileForce = flow(deleteFileForce);
+exports.deleteFileInCurrentBuild = flow(deleteFileInCurrentBuild);
 exports.copyFile = flow(copyFile);
+exports.copyFileFromDistToBuild = flow(copyFileFromDistToBuild);
 
 exports.copyENVFile = flow(copyENVFile);
 exports.parseEnvFile = flow(parseEnvFile);

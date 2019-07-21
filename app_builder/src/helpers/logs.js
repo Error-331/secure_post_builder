@@ -1,10 +1,13 @@
 'use strict';
 
 // external imports
+const {join} = require('path');
+
 const {createLogger, format, transports} = require('winston');
 require('winston-daily-rotate-file');
 
-const {is, isNil, isEmpty, defaultTo, complement, unless, curry, forEach} = require('ramda');
+const {is, isNil, isEmpty, defaultTo, clone, complement, unless, curryN, forEach} = require('ramda');
+const {Map} = require('immutable');
 
 // local imports
 const {
@@ -14,15 +17,19 @@ const {
 } = require('./../constants/logs');
 
 // implementation
-let logger = null;
-let inotifyLogger = null;
-let execaLogger = null;
+let defaultLogger = null;
+let defaultExecaLogger = null;
+let defaultInotifyLogger = null;
+
+let loggers = Map();
+let execaLoggers = Map();
+let inotifyLoggers = Map();
 
 function createWinstonLogger(configuration, formatConfiguration) {
-    const dailyRotateFileTransport = new (transports.DailyRotateFile)(configuration);
     const consoleTransport = new transports.Console();
+    const dailyRotateFileTransport = new (transports.DailyRotateFile)(configuration);
 
-    const logger = createLogger({
+    const defaultLogger = createLogger({
         format: defaultTo(format.json())(formatConfiguration),
         transports: [
             consoleTransport,
@@ -30,18 +37,32 @@ function createWinstonLogger(configuration, formatConfiguration) {
         ]
     });
 
-    return logger;
+    return defaultLogger;
 }
 
 function createDefaultLogger() {
     return createWinstonLogger(DAILY_ROTATE_FILE_LOG_CONFIGURATION);
 }
 
-function createInotifyLogger() {
-    return createWinstonLogger(DAILY_ROTATE_INOTIFY_FILE_LOG_CONFIGURATION);
+function createRegularLogger(taskName) {
+    const loggerConfig = clone(DAILY_ROTATE_FILE_LOG_CONFIGURATION);
+
+    loggerConfig.dirname = join(loggerConfig.dirname, taskName);
+    return createWinstonLogger(loggerConfig);
 }
 
-function createExecaLogger() {
+function createInotifyLogger(taskName) {
+    if (isNil(taskName)) {
+        return createWinstonLogger(DAILY_ROTATE_INOTIFY_FILE_LOG_CONFIGURATION);
+    } else {
+        const loggerConfig = clone(DAILY_ROTATE_INOTIFY_FILE_LOG_CONFIGURATION);
+        loggerConfig.dirname = join(loggerConfig.dirname, taskName);
+
+        return createWinstonLogger(loggerConfig);
+    }
+}
+
+function createExecaLogger(taskName) {
     const {combine, timestamp, printf} = format;
 
     const formatConfiguration = combine(
@@ -49,35 +70,74 @@ function createExecaLogger() {
         printf((info) => `${info.timestamp} [${info.label}] code: ${info.code}; ${info.level}: ${info.message}`)
     );
 
-    return createWinstonLogger(DAILY_ROTATE_EXECA_FILE_LOG_CONFIGURATION, formatConfiguration)
+    if (isNil(taskName)) {
+        return createWinstonLogger(DAILY_ROTATE_EXECA_FILE_LOG_CONFIGURATION, formatConfiguration);
+    } else {
+        const loggerConfig = clone(DAILY_ROTATE_EXECA_FILE_LOG_CONFIGURATION);
+        loggerConfig.dirname = join(loggerConfig.dirname, taskName);
+
+        return createWinstonLogger(loggerConfig, formatConfiguration);
+    }
 }
 
-function getDefaultLogger() {
-    logger = unless(complement(isNil), createDefaultLogger)(logger);
+function getLogger(taskName) {
+    const logger = unless(complement(isNil), () => createRegularLogger(taskName))(loggers.get(taskName));
+    loggers = loggers.set(taskName, logger);
+
     return logger;
 }
 
-function getInotifyLogger() {
-    inotifyLogger = unless(complement(isNil), createInotifyLogger)(inotifyLogger);
-    return inotifyLogger;
+function getDefaultLogger() {
+    defaultLogger = unless(complement(isNil), createDefaultLogger)(defaultLogger);
+    return defaultLogger;
 }
 
-function getExecaLogger() {
-    execaLogger = unless(complement(isNil), createExecaLogger)(execaLogger);
-    return execaLogger;
+function getInotifyLogger(taskName) {
+    let logger;
+
+    if (complement(isNil)(taskName)) {
+        logger = unless(complement(isNil), () => createInotifyLogger(taskName))(inotifyLoggers.get(taskName));
+        inotifyLoggers = inotifyLoggers.set(taskName, logger);
+    } else {
+        logger = unless(complement(isNil), () => createInotifyLogger())(defaultInotifyLogger);
+        defaultInotifyLogger = logger;
+    }
+
+    return logger;
 }
 
-function log(level, message)  {
-    const currentLogger = getDefaultLogger();
+function getExecaLogger(taskName) {
+    let logger;
+
+    if (complement(isNil)(taskName)) {
+        logger = unless(complement(isNil), () => createExecaLogger(taskName))(execaLoggers.get(taskName));
+        execaLoggers = execaLoggers.set(taskName, logger);
+    } else {
+        logger = unless(complement(isNil), () => createExecaLogger())(defaultExecaLogger);
+        defaultExecaLogger = logger;
+    }
+
+    return logger;
+}
+
+function log(level, message, taskName)  {
+    let currentLogger;
+
+    if (complement(isNil)(taskName)) {
+        currentLogger = getLogger(taskName);
+    } else {
+        currentLogger = getDefaultLogger();
+    }
+
     currentLogger.log({level, message});
 }
 
-const logInfo = curry(log)('info');
-const logWarn = curry(log)('warn');
-const logError = curry(log)('error');
+const logInfo = curryN(2, log)('info');
+const logWarn = curryN(2, log)('warn');
+const logError = curryN(2, log)('error');
 
 function logInotifyEvent(taskName, watchName, event) {
-    const currentLogger = getInotifyLogger();
+    const currentLogger = getInotifyLogger(taskName);
 
     const {watch, mask, cookie, name} = event;
     currentLogger.log({
@@ -87,7 +147,7 @@ function logInotifyEvent(taskName, watchName, event) {
 }
 
 function logExeca(taskName, execaResults) {
-    const currentLogger = getExecaLogger();
+    const currentLogger = getExecaLogger(taskName);
 
     if (complement(is)(Array, execaResults)) {
         execaResults = [execaResults];
