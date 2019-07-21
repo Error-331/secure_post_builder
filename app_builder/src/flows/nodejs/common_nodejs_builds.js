@@ -17,6 +17,15 @@ const {
 } = require('./../../helpers/common_builds');
 
 // implementation
+function * installNPMPackages(task, taskName, flowConfig) {
+    // get path to directory in current build
+    const {path, env} = flowConfig;
+    const cwd = getPathToDirectoryInCurrentBuild(task, path);
+
+    // run npm task
+    return yield execa('npm', ['install'], {cwd, env});
+}
+
 function * runNPMTask(task, npmTaskName) {
     // get path to current build (where package.json is located)
     const cwd = getPathToCurrentBuild(task);
@@ -93,6 +102,7 @@ function * reloadPM2TaskByEcosystemFileInCurrentBuild(task) {
 }
 
 // exports
+exports.installNPMPackages = flow(installNPMPackages);
 exports.runNPMTask = flow(runNPMTask);
 exports.runNPMTaskInSubDir = flow(runNPMTaskInSubDir);
 

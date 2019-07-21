@@ -9,7 +9,7 @@ const {logInfo, logExeca} = require('./logs');
 const {copyFileFromDistToBuild, deleteFileInCurrentBuild, makeBuildFromArchive} = require('./../flows/common_builds');
 const {bootstrapLerna} = require('./../flows/nodejs/lerna_builds');
 
-const {runNPMTaskInSubDir} = require('./../flows/nodejs/common_nodejs_builds');
+const {installNPMPackages, runNPMTaskInSubDir} = require('./../flows/nodejs/common_nodejs_builds');
 const {stopPM2TaskByNameSilent} = require('./../flows/nodejs/common_nodejs_builds_freestyle_adapters');
 
 // implementation
@@ -23,6 +23,8 @@ function findFlowByName(flowName) {
             return deleteFileInCurrentBuild;
         case 'makeBuildFromArchive':
             return makeBuildFromArchive;
+        case 'installNPMPackages':
+            return installNPMPackages;
         case 'runNPMTaskInSubDir':
             return runNPMTaskInSubDir;
         case 'stopPM2TaskSilent':
