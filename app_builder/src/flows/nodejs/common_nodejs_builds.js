@@ -19,8 +19,12 @@ const {
 // implementation
 function * installNPMPackages(task, taskName, flowConfig) {
     // get path to directory in current build
-    const {path, env} = flowConfig;
+    const {path} = flowConfig;
     const cwd = getPathToDirectoryInCurrentBuild(task, path);
+
+    // prepare other parameters
+    let {env} = task;
+    env = defaultTo({})(env);
 
     // run npm task
     return yield execa('npm', ['install'], {cwd, env});
