@@ -16,7 +16,7 @@ function * bootstrapLerna(task, taskName, flowConfig) {
     const cwd = getPathToCurrentBuild(task);
 
     // prepare other parameters
-    let {env} = task;
+    let {env} = flowConfig;
     env = defaultTo({})(env);
 
     // run npm task
