@@ -6,7 +6,7 @@ const {join} = require('path');
 const {createLogger, format, transports} = require('winston');
 require('winston-daily-rotate-file');
 
-const {is, isNil, isEmpty, defaultTo, clone, complement, equals, unless, curryN, forEach} = require('ramda');
+const {is, isNil, isEmpty, defaultTo, clone, complement, unless, curryN, forEach} = require('ramda');
 const {Map} = require('immutable');
 
 // local imports
@@ -27,14 +27,16 @@ let inotifyLoggers = Map();
 
 function createWinstonLogger(configuration, formatConfiguration) {
     const dailyRotateFileTransport = new (transports.DailyRotateFile)(configuration);
+    const consoleTransport = new transports.Console();
+
     const defaultLogger = createLogger({
         format: defaultTo(format.json())(formatConfiguration),
         transports: [
-            dailyRotateFileTransport
+            consoleTransport,
+            dailyRotateFileTransport,
         ]
     });
 
-    unless(equals('production'), () => defaultLogger.add(new transports.Console()))(process.env.NODE_ENV);
     return defaultLogger;
 }
 
