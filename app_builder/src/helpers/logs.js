@@ -4,7 +4,7 @@
 const {createLogger, format, transports} = require('winston');
 require('winston-daily-rotate-file');
 
-const {is, isNil, isEmpty, defaultTo, complement, equals, unless, curry, forEach} = require('ramda');
+const {is, isNil, isEmpty, defaultTo, complement, unless, curry, forEach} = require('ramda');
 
 // local imports
 const {
@@ -20,14 +20,16 @@ let execaLogger = null;
 
 function createWinstonLogger(configuration, formatConfiguration) {
     const dailyRotateFileTransport = new (transports.DailyRotateFile)(configuration);
+    const consoleTransport = new transports.Console();
+
     const logger = createLogger({
         format: defaultTo(format.json())(formatConfiguration),
         transports: [
-            dailyRotateFileTransport
+            consoleTransport,
+            dailyRotateFileTransport,
         ]
     });
 
-    unless(equals('production'), () => logger.add(new transports.Console()))(process.env.NODE_ENV);
     return logger;
 }
 
